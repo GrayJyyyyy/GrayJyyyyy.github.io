@@ -59,7 +59,7 @@
       .form-row {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
+        gap: 30px;
         margin-bottom: 20px;
       }
 
@@ -297,6 +297,227 @@
         font-weight: 600;
         color: #4b5563;
       }
+
+      /* 侧边栏样式 */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        right: -380px;
+        width: 380px;
+        height: 100%;
+        background-color: white;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+        transition: right 0.3s ease;
+        overflow-y: auto;
+        z-index: 1000;
+      }
+
+      .sidebar.open {
+        right: 0;
+      }
+
+      .sidebar-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        z-index: 1001;
+        transition: background-color 0.2s;
+      }
+
+      .sidebar-toggle:hover {
+        background-color: #1d4ed8;
+      }
+
+      .sidebar-toggle.disabled {
+        background-color: #94a3b8;
+        cursor: not-allowed;
+      }
+
+      .sidebar-toggle-tooltip {
+        position: absolute;
+        right: 60px;
+        background-color: #1e293b;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity 0.2s;
+        pointer-events: none;
+      }
+
+      .sidebar-toggle:hover .sidebar-toggle-tooltip {
+        opacity: 1;
+      }
+
+      .sidebar-header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .sidebar-title {
+        font-size: 1.2em;
+        font-weight: 600;
+      }
+
+      .sidebar-close {
+        cursor: pointer;
+        font-size: 1.5em;
+      }
+
+      .sidebar-content {
+        padding: 15px;
+      }
+
+      .date-section {
+        margin-bottom: 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+
+      .date-header {
+        background-color: var(--secondary-color);
+        padding: 10px 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+      }
+
+      .date-title {
+        font-weight: 600;
+        color: var(--primary-color);
+      }
+
+      .date-actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      .action-button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 0.9em;
+        color: #6b7280;
+        padding: 2px 5px;
+        border-radius: 3px;
+        transition: background-color 0.2s;
+      }
+
+      .action-button:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+
+      .action-button.delete {
+        color: var(--warning-color);
+      }
+
+      .order-items {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+      }
+
+      .order-items.expanded {
+        max-height: 1000px;
+      }
+
+      .order-item {
+        padding: 10px 15px;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .order-item:last-child {
+        border-bottom: none;
+      }
+
+      .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+      }
+
+      .order-title {
+        font-weight: 600;
+        color: var(--text-color);
+      }
+
+      .order-details {
+        font-size: 0.9em;
+        color: #6b7280;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .no-orders-message {
+        text-align: center;
+        padding: 20px;
+        color: #6b7280;
+        font-style: italic;
+      }
+
+      .sidebar-footer {
+        padding: 15px;
+        display: flex;
+        justify-content: center;
+      }
+
+      .clear-all-button {
+        background-color: #f1f5f9;
+        border: 1px solid var(--border-color);
+        padding: 8px 15px;
+        border-radius: 4px;
+        font-weight: 600;
+        color: var(--warning-color);
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .clear-all-button:hover {
+        background-color: #fee2e2;
+      }
+
+      .reset-button {
+        background-color: #94a3b8;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        margin-left: 10px;
+      }
+
+      .reset-button:hover {
+        background-color: #64748b;
+      }
+
+      .submit-row {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+      }
     </style>
   </head>
   <body>
@@ -393,10 +614,28 @@
 
           <div class="submit-row">
             <button type="submit">计算交易策略</button>
+            <button type="button" id="resetParamsBtn" class="reset-button">重置参数</button>
           </div>
         </form>
       </div>
+      <!-- 订单历史侧边栏 -->
+      <div class="sidebar-toggle" id="sidebarToggle">
+        📋
+        <div class="sidebar-toggle-tooltip">历史订单</div>
+      </div>
 
+      <div class="sidebar" id="ordersSidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-title">历史交易订单</div>
+          <div class="sidebar-close" id="sidebarClose">✕</div>
+        </div>
+        <div class="sidebar-content" id="sidebarContent">
+          <!-- 订单内容将在这里动态生成 -->
+        </div>
+        <div class="sidebar-footer">
+          <button class="clear-all-button" id="clearAllOrders">清除所有历史订单</button>
+        </div>
+      </div>
       <div id="results" class="results-container">
         <div class="results-header">
           <h2>交易策略结果</h2>
@@ -898,7 +1137,275 @@
         }
       }
 
-      // 处理表单提交
+      /**
+       * 订单存储和侧边栏功能
+       */
+      // 订单存储对象
+      const OrderStorage = {
+        // 保存订单到localStorage
+        saveOrder: function (order) {
+          // 获取当前日期作为分组键
+          const today = new Date().toISOString().split("T")[0]; // 格式: YYYY-MM-DD
+
+          // 从localStorage获取现有订单
+          const allOrders = this.getAllOrders();
+
+          // 为订单添加ID和时间戳
+          order.id = Date.now().toString();
+          order.timestamp = new Date().toISOString();
+
+          // 如果当天没有订单，创建新数组
+          if (!allOrders[today]) {
+            allOrders[today] = [];
+          }
+
+          // 添加新订单
+          allOrders[today].push(order);
+
+          // 保存回localStorage
+          localStorage.setItem("tradingOrders", JSON.stringify(allOrders));
+
+          return order;
+        },
+
+        // 获取所有订单
+        getAllOrders: function () {
+          const ordersStr = localStorage.getItem("tradingOrders");
+          return ordersStr ? JSON.parse(ordersStr) : {};
+        },
+
+        // 删除指定订单
+        deleteOrder: function (date, orderId) {
+          const allOrders = this.getAllOrders();
+
+          if (allOrders[date]) {
+            // 过滤掉要删除的订单
+            allOrders[date] = allOrders[date].filter(order => order.id !== orderId);
+
+            // 如果该日期下没有订单了，删除整个日期键
+            if (allOrders[date].length === 0) {
+              delete allOrders[date];
+            }
+
+            // 保存回localStorage
+            localStorage.setItem("tradingOrders", JSON.stringify(allOrders));
+            return true;
+          }
+
+          return false;
+        },
+
+        // 删除某一天的所有订单
+        deleteDateOrders: function (date) {
+          const allOrders = this.getAllOrders();
+
+          if (allOrders[date]) {
+            delete allOrders[date];
+            localStorage.setItem("tradingOrders", JSON.stringify(allOrders));
+            return true;
+          }
+
+          return false;
+        },
+
+        // 删除所有订单
+        clearAllOrders: function () {
+          localStorage.removeItem("tradingOrders");
+          return true;
+        },
+      };
+
+      // 侧边栏UI控制
+      const SidebarUI = {
+        init: function () {
+          // 获取DOM元素
+          this.sidebar = document.getElementById("ordersSidebar");
+          this.toggle = document.getElementById("sidebarToggle");
+          this.closeBtn = document.getElementById("sidebarClose");
+          this.content = document.getElementById("sidebarContent");
+          this.clearAllBtn = document.getElementById("clearAllOrders");
+
+          // 订单数量检查和切换按钮状态更新
+          this.updateToggleState();
+
+          // 绑定事件
+          this.bindEvents();
+        },
+
+        bindEvents: function () {
+          // 打开侧边栏
+          this.toggle.addEventListener("click", () => {
+            if (!this.toggle.classList.contains("disabled")) {
+              this.openSidebar();
+            }
+          });
+
+          // 关闭侧边栏
+          this.closeBtn.addEventListener("click", () => {
+            this.closeSidebar();
+          });
+
+          // 清除所有订单
+          this.clearAllBtn.addEventListener("click", () => {
+            if (confirm("确定要清除所有历史订单吗？此操作不可恢复。")) {
+              OrderStorage.clearAllOrders();
+              this.renderOrders();
+              this.updateToggleState();
+
+              // 检查是否还有历史订单，如果没有则自动关闭侧边栏
+              const allOrders = OrderStorage.getAllOrders();
+              if (Object.keys(allOrders).length === 0) {
+                this.closeSidebar();
+              }
+            }
+          });
+
+          // 委托事件监听器用于日期展开/收起
+          // 委托事件监听器用于日期展开/收起
+          this.content.addEventListener("click", e => {
+            // 日期头部点击展开/收起
+            if (e.target.closest(".date-header")) {
+              const dateSection = e.target.closest(".date-section");
+              const orderItems = dateSection.querySelector(".order-items");
+              orderItems.classList.toggle("expanded");
+            }
+
+            // 删除单个订单
+            if (e.target.classList.contains("delete-order")) {
+              const orderId = e.target.dataset.id;
+              const date = e.target.dataset.date;
+
+              if (confirm("确定要删除这个订单吗？")) {
+                OrderStorage.deleteOrder(date, orderId);
+                this.renderOrders();
+                this.updateToggleState();
+
+                // 检查是否还有历史订单，如果没有则自动关闭侧边栏
+                const allOrders = OrderStorage.getAllOrders();
+                if (Object.keys(allOrders).length === 0) {
+                  this.closeSidebar();
+                }
+              }
+            }
+
+            // 删除日期下所有订单
+            if (e.target.classList.contains("delete-date")) {
+              const date = e.target.dataset.date;
+
+              if (confirm(`确定要删除 ${date} 的所有订单吗？`)) {
+                OrderStorage.deleteDateOrders(date);
+                this.renderOrders();
+                this.updateToggleState();
+
+                // 检查是否还有历史订单，如果没有则自动关闭侧边栏
+                const allOrders = OrderStorage.getAllOrders();
+                if (Object.keys(allOrders).length === 0) {
+                  this.closeSidebar();
+                }
+              }
+            }
+          });
+        },
+
+        openSidebar: function () {
+          this.sidebar.classList.add("open");
+          this.toggle.style.display = "none"; // 侧边栏打开时，隐藏侧边栏图标
+          this.renderOrders();
+        },
+
+        closeSidebar: function () {
+          this.sidebar.classList.remove("open");
+          this.toggle.style.display = "flex"; // 侧边栏关闭时，显示侧边栏图标
+        },
+
+        renderOrders: function () {
+          // 获取所有订单
+          const allOrders = OrderStorage.getAllOrders();
+          const dates = Object.keys(allOrders).sort().reverse(); // 最新日期在前
+
+          // 清空内容区域
+          this.content.innerHTML = "";
+
+          if (dates.length === 0) {
+            this.content.innerHTML = '<div class="no-orders-message">暂无历史订单</div>';
+            return;
+          }
+
+          // 为每个日期创建一个部分
+          dates.forEach(date => {
+            const dateOrders = allOrders[date];
+            const dateSection = document.createElement("div");
+            dateSection.className = "date-section";
+
+            // 日期头部
+            const dateHeader = document.createElement("div");
+            dateHeader.className = "date-header";
+            dateHeader.innerHTML = `
+                <div class="date-title">${date} (${dateOrders.length}个订单)</div>
+                <div class="date-actions">
+                  <button class="action-button delete delete-date" data-date="${date}">删除</button>
+                </div>
+              `;
+
+            // 创建订单容器
+            const orderItems = document.createElement("div");
+            orderItems.className = "order-items";
+
+            // 为每个订单创建项目
+            dateOrders.forEach(order => {
+              const orderItem = document.createElement("div");
+              orderItem.className = "order-item";
+
+              // 格式化时间
+              const orderTime = new Date(order.timestamp).toLocaleTimeString();
+
+              orderItem.innerHTML = `
+                  <div class="order-header">
+                    <div class="order-title">${order.assetSymbol} (${order.availableLeverage}x ${
+                order.tradeDirection
+              })</div>
+                    <button class="action-button delete delete-order" data-id="${
+                      order.id
+                    }" data-date="${date}">删除</button>
+                  </div>
+                  <div class="order-details">
+                    <div>入场: ${formatCurrency(order.currentPrice)} | 止盈: ${formatCurrency(
+                order.bufferedTargetPrice
+              )}</div>
+                    <div>止损: ${formatCurrency(order.bufferedStopLossPrice)} | 数量: ${order.assetQuantity} ${
+                order.assetSymbol
+              }</div>
+                    <div>盈亏比: ${order.riskRewardRatio.toFixed(2)} | 时间: ${orderTime}</div>
+                  </div>
+                `;
+
+              orderItems.appendChild(orderItem);
+            });
+
+            // 组装日期部分
+            dateSection.appendChild(dateHeader);
+            dateSection.appendChild(orderItems);
+
+            // 添加到内容区域
+            this.content.appendChild(dateSection);
+          });
+        },
+
+        updateToggleState: function () {
+          const allOrders = OrderStorage.getAllOrders();
+          const hasOrders = Object.keys(allOrders).length > 0;
+
+          if (hasOrders) {
+            this.toggle.classList.remove("disabled");
+            this.toggle.querySelector(".sidebar-toggle-tooltip").textContent = "历史订单";
+          } else {
+            this.toggle.classList.add("disabled");
+            this.toggle.querySelector(".sidebar-toggle-tooltip").textContent = "暂无历史订单";
+          }
+        },
+      };
+
+      // 表单提交处理函数
       document.getElementById("tradingForm").addEventListener("submit", function (e) {
         e.preventDefault();
 
@@ -925,6 +1432,29 @@
             pinBarHigh,
             pinBarLow
           );
+
+          // 保存订单到localStorage
+          if (result) {
+            // 创建要保存的订单对象
+            const orderToSave = {
+              assetSymbol,
+              currentPrice,
+              targetPrice,
+              stopLossPrice,
+              bufferedTargetPrice: result.bufferedTargetPrice,
+              bufferedStopLossPrice: result.bufferedStopLossPrice,
+              availableLeverage,
+              tradeDirection: result.tradeDirection,
+              assetQuantity: result.assetQuantity,
+              riskRewardRatio: result.riskRewardRatio,
+            };
+
+            // 保存订单
+            OrderStorage.saveOrder(orderToSave);
+
+            // 更新侧边栏状态
+            SidebarUI.updateToggleState();
+          }
 
           // 显示结果容器
           document.getElementById("results").style.display = "block";
@@ -986,30 +1516,30 @@
             const retracementItem = document.createElement("div");
             retracementItem.className = "retracement-item";
             retracementItem.innerHTML = `
-              <div class="retracement-title">${option.title}</div>
-              <div class="result-row">
-                <span class="result-label">${option.entryLabel}</span>
-                <span id="${option.entryId}">${formatCurrency(option.entryPrice)}</span>
-              </div>
-              <div class="price-info">
-                <div class="price-info-row">
-                  <span class="price-info-label">止盈价格:</span>
-                  <span>${formatCurrency(option.targetPrice)}</span>
+                <div class="retracement-title">${option.title}</div>
+                <div class="result-row">
+                  <span class="result-label">${option.entryLabel}</span>
+                  <span id="${option.entryId}">${formatCurrency(option.entryPrice)}</span>
                 </div>
-                <div class="price-info-row">
-                  <span class="price-info-label">止损价格:</span>
-                  <span>${formatCurrency(option.stopLossPrice)}</span>
+                <div class="price-info">
+                  <div class="price-info-row">
+                    <span class="price-info-label">止盈价格:</span>
+                    <span>${formatCurrency(option.targetPrice)}</span>
+                  </div>
+                  <div class="price-info-row">
+                    <span class="price-info-label">止损价格:</span>
+                    <span>${formatCurrency(option.stopLossPrice)}</span>
+                  </div>
                 </div>
-              </div>
-              <div class="result-row">
-                <span class="result-label">${option.rrLabel}</span>
-                <span id="${option.rrId}"></span>
-              </div>
-              <div class="result-row">
-                <span class="result-label">${option.qtyLabel}</span>
-                <span id="${option.qtyId}" class="quantity-bold">${option.quantity} ${assetSymbol}</span>
-              </div>
-            `;
+                <div class="result-row">
+                  <span class="result-label">${option.rrLabel}</span>
+                  <span id="${option.rrId}"></span>
+                </div>
+                <div class="result-row">
+                  <span class="result-label">${option.qtyLabel}</span>
+                  <span id="${option.qtyId}" class="quantity-bold">${option.quantity} ${assetSymbol}</span>
+                </div>
+              `;
             retracementContainer.appendChild(retracementItem);
 
             // 设置盈亏比，小于1.5时显示红色警告，大于1.5时显示绿色
@@ -1057,6 +1587,26 @@
         } catch (error) {
           alert(`计算错误: ${error.message}`);
         }
+      });
+
+      // 重置参数按钮事件处理
+      document.getElementById("resetParamsBtn").addEventListener("click", function () {
+        // 重置指定字段
+        document.getElementById("assetSymbol").value = "";
+        document.getElementById("currentPrice").value = "";
+        document.getElementById("minOrderSize").value = "0.01";
+        document.getElementById("targetPrice").value = "";
+        document.getElementById("stopLossPrice").value = "";
+        document.getElementById("pinBarHigh").value = "";
+        document.getElementById("pinBarLow").value = "";
+
+        // 聚焦到币种符号输入框
+        document.getElementById("assetSymbol").focus();
+      });
+
+      // 初始化侧边栏UI
+      document.addEventListener("DOMContentLoaded", function () {
+        SidebarUI.init();
       });
     </script>
   </body>
