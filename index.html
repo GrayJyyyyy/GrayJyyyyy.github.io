@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>加密货币固定风险交易计算器</title>
     <style>
+      /* 将此CSS代码添加到HTML文件的<head>部分中的<style>标签内 */
+
       :root {
         --primary-color: #2563eb;
         --secondary-color: #eef2ff;
@@ -526,7 +528,7 @@
         <h1>加密货币固定风险交易计算器</h1>
         <p class="description">
           基于账户百分比风险管理的交易策略计算工具，确保每笔交易的最大损失不超过账户总额的设定百分比。
-          包含0.03%的进场缓冲和多种回调入场分析。
+          包含可调节的进场缓冲和多种回调入场分析。
         </p>
       </header>
 
@@ -603,12 +605,31 @@
 
           <div class="form-row">
             <div class="form-group">
+              <label for="bufferPercent">缓冲比例 (%)</label>
+              <input
+                type="number"
+                id="bufferPercent"
+                placeholder="进场缓冲百分比"
+                value="0.1"
+                step="0.01"
+                min="0.01"
+                max="10"
+                required
+              />
+            </div>
+            <div class="form-group">
               <label for="pinBarHigh">PinBar 最高点 (USD)</label>
               <input type="number" id="pinBarHigh" placeholder="输入PinBar最高价格" step="any" min="0.01" required />
             </div>
+          </div>
+
+          <div class="form-row">
             <div class="form-group">
               <label for="pinBarLow">PinBar 最低点 (USD)</label>
               <input type="number" id="pinBarLow" placeholder="输入PinBar最低价格" step="any" min="0.01" required />
+            </div>
+            <div class="form-group">
+              <!-- 空白占位，保持表单对称 -->
             </div>
           </div>
 
@@ -618,6 +639,7 @@
           </div>
         </form>
       </div>
+
       <!-- 订单历史侧边栏 -->
       <div class="sidebar-toggle" id="sidebarToggle">
         📋
@@ -636,6 +658,7 @@
           <button class="clear-all-button" id="clearAllOrders">清除所有历史订单</button>
         </div>
       </div>
+
       <div id="results" class="results-container">
         <div class="results-header">
           <h2>交易策略结果</h2>
@@ -662,6 +685,10 @@
           <div class="summary-item">
             <span class="summary-label">盈亏比:</span>
             <span id="riskRewardRatio" class="summary-value"></span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">缓冲比例:</span>
+            <span id="bufferInfo" class="summary-value"></span>
           </div>
         </div>
 
@@ -750,6 +777,7 @@
             </div>
           </div>
         </div>
+
         <div id="dualOrderSuggestion" style="display: none" class="dual-order-section">
           <div class="dual-order-title">💡 双挂单建议</div>
           <div class="result-row">
@@ -779,6 +807,7 @@
             <span class="suggestion-text">同时设置两个挂单，避免回调不到的情况，确保不错过交易机会</span>
           </div>
         </div>
+
         <div class="retracement-section">
           <h3>🔍 回调入场分析</h3>
           <div id="retracementContainer" class="retracement-container">
@@ -787,8 +816,7 @@
         </div>
       </div>
     </div>
-
-    <script>
+    <!-- <script>
       /**
        * 计算固定风险的加密货币永续合约杠杆交易策略
        */
@@ -971,14 +999,19 @@
 
         // 然后应用缓冲
         let bufferedTargetForSl50;
+        let bufferedSl50; // 新增：为sl50添加缓冲
         if (isLong) {
           bufferedTargetForSl50 = originalTargetPrice * 0.9997;
+          bufferedSl50 = sl50 * 0.9997; // 新增：做多时止损价格下降0.03%
         } else {
           bufferedTargetForSl50 = originalTargetPrice * 1.0003;
+          bufferedSl50 = sl50 * 1.0003; // 新增：做空时止损价格上升0.03%
         }
 
-        const rrWithSl50 = Math.abs(bufferedTargetForSl50 - currentPrice) / Math.abs(currentPrice - sl50);
-        const qtyWithSl50 = Math.floor(fixedRiskAmount / Math.abs(currentPrice - sl50) / minOrderSize) * minOrderSize;
+        // 使用缓冲后的sl50计算盈亏比
+        const rrWithSl50 = Math.abs(bufferedTargetForSl50 - currentPrice) / Math.abs(currentPrice - bufferedSl50);
+        const qtyWithSl50 =
+          Math.floor(fixedRiskAmount / Math.abs(currentPrice - bufferedSl50) / minOrderSize) * minOrderSize;
         const isSl50Recommended = rrWithSl50 >= 1.5;
 
         // 5. 入场点位在回调50%位置，原始止损止盈
@@ -1075,7 +1108,7 @@
               title: "原始入场 + 50% 回调止损",
               entryPrice: currentPrice,
               targetPrice: bufferedTargetForSl50,
-              stopLossPrice: sl50,
+              stopLossPrice: bufferedSl50, // 修改：使用缓冲后的sl50
               riskReward: rrWithSl50,
               quantity: qtyWithSl50,
               isRecommended: isSl50Recommended,
@@ -1599,6 +1632,791 @@
         document.getElementById("stopLossPrice").value = "";
         document.getElementById("pinBarHigh").value = "";
         document.getElementById("pinBarLow").value = "";
+
+        // 聚焦到币种符号输入框
+        document.getElementById("assetSymbol").focus();
+      });
+
+      // 初始化侧边栏UI
+      document.addEventListener("DOMContentLoaded", function () {
+        SidebarUI.init();
+      });
+    </script> -->
+    <script>
+      // 将此JavaScript代码添加到HTML文件底部的<script>标签内
+
+      /**
+       * 计算固定风险的加密货币永续合约杠杆交易策略
+       */
+      function calculateFixedRiskTrade(
+        currentPrice,
+        targetPrice,
+        stopLossPrice,
+        accountBalance,
+        maxBalanceRiskPercent = 2,
+        availableLeverage,
+        minOrderSize = 0.001,
+        pinBarHigh,
+        pinBarLow,
+        bufferPercent = 0.1 // 缓冲百分比参数，默认为0.1%
+      ) {
+        // 确定交易方向
+        const isLong = targetPrice > currentPrice;
+        const tradeDirection = isLong ? "做多 (Long)" : "做空 (Short)";
+
+        // 保存原始目标价格和止损价格
+        const originalTargetPrice = targetPrice;
+        const originalStopLossPrice = stopLossPrice;
+
+        // 计算PinBar的长度
+        const pinBarLength = pinBarHigh - pinBarLow;
+
+        // 计算38.2%, 50%和61.8%的回调位置
+        let entry382, entry50, entry618, sl50;
+
+        if (isLong) {
+          // 做多情况下，回调是从高点向低点回落
+          entry382 = pinBarHigh - pinBarLength * 0.382;
+          entry50 = pinBarHigh - pinBarLength * 0.5;
+          entry618 = pinBarHigh - pinBarLength * 0.618;
+          sl50 = pinBarHigh - pinBarLength * 0.5;
+        } else {
+          // 做空情况下，回调是从低点向高点回升
+          entry382 = pinBarLow + pinBarLength * 0.382;
+          entry50 = pinBarLow + pinBarLength * 0.5;
+          entry618 = pinBarLow + pinBarLength * 0.618;
+          sl50 = pinBarLow + pinBarLength * 0.5;
+        }
+
+        // 计算缓冲系数，例如0.03%的缓冲，做多时系数为0.9997，做空时为1.0003
+        const bufferFactor = isLong ? 1 - bufferPercent / 100 : 1 + bufferPercent / 100;
+
+        // 应用缓冲
+        let bufferedTargetPrice = targetPrice * bufferFactor;
+        let bufferedStopLossPrice = stopLossPrice * bufferFactor;
+
+        // 计算固定风险金额（账户总余额 * 风险百分比）
+        const fixedRiskAmount = accountBalance * (maxBalanceRiskPercent / 100);
+
+        // 计算止损距离的百分比（用于显示）
+        let stopLossPercentage;
+        if (isLong) {
+          // 做多时，止损价格应低于当前价格
+          if (bufferedStopLossPrice >= currentPrice) {
+            throw new Error("做多交易的止损价格必须低于当前价格");
+          }
+          stopLossPercentage = (currentPrice - bufferedStopLossPrice) / currentPrice;
+        } else {
+          // 做空时，止损价格应高于当前价格
+          if (bufferedStopLossPrice <= currentPrice) {
+            throw new Error("做空交易的止损价格必须高于当前价格");
+          }
+          stopLossPercentage = (bufferedStopLossPrice - currentPrice) / currentPrice;
+        }
+
+        // 计算每个币的价格变动幅度(绝对值)
+        const priceChangePerCoin = Math.abs(currentPrice - bufferedStopLossPrice);
+
+        // 计算在不考虑杠杆的情况下，可以承担风险的资产数量
+        // 固定风险金额 / 每个币的价格变动 = 可以购买的币数
+        const rawAssetQuantity = fixedRiskAmount / priceChangePerCoin;
+
+        // 根据最小下单单位向下取整
+        const assetQuantityRounded = Math.floor(rawAssetQuantity / minOrderSize) * minOrderSize;
+
+        // 计算实际的名义头寸价值
+        const actualNotionalValue = assetQuantityRounded * currentPrice;
+
+        // 计算实际需要的保证金（名义价值 / 杠杆）
+        const actualMarginRequired = actualNotionalValue / availableLeverage;
+
+        // 检查保证金是否超过账户余额
+        const isSufficientBalance = actualMarginRequired <= accountBalance;
+
+        // 计算盈利目标的百分比
+        let targetProfitPercentage;
+        if (isLong) {
+          targetProfitPercentage = (bufferedTargetPrice - currentPrice) / currentPrice;
+        } else {
+          targetProfitPercentage = (currentPrice - bufferedTargetPrice) / currentPrice;
+        }
+
+        // 计算最大收益
+        const maxProfit = assetQuantityRounded * Math.abs(bufferedTargetPrice - currentPrice);
+
+        // 计算实际的最大损失（应该接近固定风险金额）
+        const actualMaxLoss = assetQuantityRounded * priceChangePerCoin;
+
+        // 计算实际的余额风险百分比
+        const actualBalanceRiskPercent = (actualMaxLoss / accountBalance) * 100;
+
+        // 计算盈亏比
+        const riskRewardRatio = maxProfit / actualMaxLoss;
+        const isRecommended = riskRewardRatio >= 1.5;
+
+        // 判断是否需要提供双挂单建议（只有当原始入场盈亏比大于1.5时才提供）
+        const showDualOrderSuggestion = isRecommended;
+
+        // 计算各种回调情况下的风险收益比
+        // 为各种回调情况应用缓冲
+        let bufferedTargetFor382 = originalTargetPrice * bufferFactor;
+        let bufferedStopLossFor382 = originalStopLossPrice * bufferFactor;
+
+        let bufferedTargetFor618 = originalTargetPrice * bufferFactor;
+        let bufferedStopLossFor618 = originalStopLossPrice * bufferFactor;
+
+        let bufferedTargetFor50 = originalTargetPrice * bufferFactor;
+        let bufferedStopLossFor50 = originalStopLossPrice * bufferFactor;
+
+        let bufferedTargetForSl50 = originalTargetPrice * bufferFactor;
+        let bufferedSl50 = sl50 * bufferFactor;
+
+        // 1. 38.2%回调入场，原始止损止盈
+        const rr382 = Math.abs(bufferedTargetFor382 - entry382) / Math.abs(entry382 - bufferedStopLossFor382);
+        const qty382 =
+          Math.floor(fixedRiskAmount / Math.abs(entry382 - bufferedStopLossFor382) / minOrderSize) * minOrderSize;
+        const is382Recommended = rr382 >= 1.5;
+
+        // 2. 61.8%回调入场，原始止损止盈
+        const rr618 = Math.abs(bufferedTargetFor618 - entry618) / Math.abs(entry618 - bufferedStopLossFor618);
+        const qty618 =
+          Math.floor(fixedRiskAmount / Math.abs(entry618 - bufferedStopLossFor618) / minOrderSize) * minOrderSize;
+        const is618Recommended = rr618 >= 1.5;
+
+        // 3. 50%回调入场，原始止损止盈
+        const rr50 = Math.abs(bufferedTargetFor50 - entry50) / Math.abs(entry50 - bufferedStopLossFor50);
+        const qty50 =
+          Math.floor(fixedRiskAmount / Math.abs(entry50 - bufferedStopLossFor50) / minOrderSize) * minOrderSize;
+        const is50Recommended = rr50 >= 1.5;
+
+        // 4. 原始入场，止损改为50%回调位置
+        const rrWithSl50 = Math.abs(bufferedTargetForSl50 - currentPrice) / Math.abs(currentPrice - bufferedSl50);
+        const qtyWithSl50 =
+          Math.floor(fixedRiskAmount / Math.abs(currentPrice - bufferedSl50) / minOrderSize) * minOrderSize;
+        const isSl50Recommended = rrWithSl50 >= 1.5;
+
+        // 5. 入场点位在回调50%位置，原始止损止盈
+        const rrEntry50OriginalSL = rr50; // 这个实际上和情况3是一样的
+        const qtyEntry50OriginalSL = qty50;
+        const isEntry50OriginalSLRecommended = is50Recommended;
+
+        // 返回计算结果
+        return {
+          tradeDirection,
+          assetQuantity: assetQuantityRounded,
+          notionalPositionValue: actualNotionalValue,
+          marginRequired: actualMarginRequired,
+          availableLeverage,
+          maxProfit,
+          maxLoss: actualMaxLoss,
+          riskRewardRatio,
+          isRecommended,
+          isSufficientBalance,
+          stopLossPercentage,
+          targetProfitPercentage,
+          fixedRiskAmount,
+          maxBalanceRiskPercent,
+          actualBalanceRiskPercent,
+          // 新增返回值
+          originalTargetPrice,
+          originalStopLossPrice,
+          bufferedTargetPrice,
+          bufferedStopLossPrice,
+          bufferPercent, // 返回使用的缓冲百分比
+          entry382,
+          entry50,
+          entry618,
+          sl50,
+          rr382,
+          rr50,
+          rr618,
+          rrWithSl50,
+          qty382,
+          qty50,
+          qty618,
+          qtyWithSl50,
+          rrEntry50OriginalSL,
+          qtyEntry50OriginalSL,
+          is382Recommended,
+          is50Recommended,
+          is618Recommended,
+          isSl50Recommended,
+          isEntry50OriginalSLRecommended,
+          showDualOrderSuggestion,
+          // 缓冲后的价格
+          bufferedTargetFor382,
+          bufferedStopLossFor382,
+          bufferedTargetFor618,
+          bufferedStopLossFor618,
+          bufferedTargetFor50,
+          bufferedStopLossFor50,
+          bufferedTargetForSl50,
+          // 用于排序的数据
+          retracementOptions: [
+            {
+              id: "option1",
+              title: "38.2% 回调入场 + 原始止损止盈",
+              entryPrice: entry382,
+              targetPrice: bufferedTargetFor382,
+              stopLossPrice: bufferedStopLossFor382,
+              riskReward: rr382,
+              quantity: qty382,
+              isRecommended: is382Recommended,
+              entryLabel: "回调入场价格:",
+              entryId: "entry382",
+              rrLabel: "盈亏比:",
+              rrId: "rr382",
+              qtyLabel: "建议交易数量:",
+              qtyId: "qty382",
+            },
+            {
+              id: "option2",
+              title: "61.8% 回调入场 + 原始止损止盈",
+              entryPrice: entry618,
+              targetPrice: bufferedTargetFor618,
+              stopLossPrice: bufferedStopLossFor618,
+              riskReward: rr618,
+              quantity: qty618,
+              isRecommended: is618Recommended,
+              entryLabel: "回调入场价格:",
+              entryId: "entry618",
+              rrLabel: "盈亏比:",
+              rrId: "rr618",
+              qtyLabel: "建议交易数量:",
+              qtyId: "qty618",
+            },
+            {
+              id: "option3",
+              title: "原始入场 + 50% 回调止损",
+              entryPrice: currentPrice,
+              targetPrice: bufferedTargetForSl50,
+              stopLossPrice: bufferedSl50,
+              riskReward: rrWithSl50,
+              quantity: qtyWithSl50,
+              isRecommended: isSl50Recommended,
+              entryLabel: "修改后止损价格:",
+              entryId: "sl50",
+              rrLabel: "盈亏比:",
+              rrId: "rrWithSl50",
+              qtyLabel: "建议交易数量:",
+              qtyId: "qtyWithSl50",
+            },
+            {
+              id: "option4",
+              title: "50% 回调入场 + 原始止损止盈",
+              entryPrice: entry50,
+              targetPrice: bufferedTargetFor50,
+              stopLossPrice: bufferedStopLossFor50,
+              riskReward: rrEntry50OriginalSL,
+              quantity: qtyEntry50OriginalSL,
+              isRecommended: isEntry50OriginalSLRecommended,
+              entryLabel: "入场价格:",
+              entryId: "entryAt50Original",
+              rrLabel: "盈亏比:",
+              rrId: "rrEntry50OriginalSL",
+              qtyLabel: "建议交易数量:",
+              qtyId: "qtyEntry50OriginalSL",
+            },
+          ],
+        };
+      }
+
+      // 格式化显示金额
+      function formatCurrency(amount) {
+        return new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 8,
+        }).format(amount);
+      }
+
+      // 格式化百分比
+      function formatPercent(value) {
+        return new Intl.NumberFormat("en-US", {
+          style: "percent",
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(value / 100);
+      }
+
+      // 渲染盈亏比，小于1.5时显示红色并警告，大于1.5时显示绿色
+      function renderRiskReward(value, elementId, isRecommended) {
+        const element = document.getElementById(elementId);
+        if (isRecommended) {
+          element.textContent = value.toFixed(4);
+          element.className = "rr-success"; // 绿色显示
+        } else {
+          element.innerHTML = `<span class="risk-warning">${value.toFixed(4)} (盈亏比低于1.5，不建议入场)</span>`;
+          element.className = "risk-warning";
+        }
+      }
+
+      /**
+       * 订单存储和侧边栏功能
+       */
+      // 订单存储对象
+      const OrderStorage = {
+        // 保存订单到localStorage
+        saveOrder: function (order) {
+          // 获取当前日期作为分组键
+          const today = new Date().toISOString().split("T")[0]; // 格式: YYYY-MM-DD
+
+          // 从localStorage获取现有订单
+          const allOrders = this.getAllOrders();
+
+          // 为订单添加ID和时间戳
+          order.id = Date.now().toString();
+          order.timestamp = new Date().toISOString();
+
+          // 如果当天没有订单，创建新数组
+          if (!allOrders[today]) {
+            allOrders[today] = [];
+          }
+
+          // 添加新订单
+          allOrders[today].push(order);
+
+          // 保存回localStorage
+          localStorage.setItem("tradingOrders", JSON.stringify(allOrders));
+
+          return order;
+        },
+
+        // 获取所有订单
+        getAllOrders: function () {
+          const ordersStr = localStorage.getItem("tradingOrders");
+          return ordersStr ? JSON.parse(ordersStr) : {};
+        },
+
+        // 删除指定订单
+        deleteOrder: function (date, orderId) {
+          const allOrders = this.getAllOrders();
+
+          if (allOrders[date]) {
+            // 过滤掉要删除的订单
+            allOrders[date] = allOrders[date].filter(order => order.id !== orderId);
+
+            // 如果该日期下没有订单了，删除整个日期键
+            if (allOrders[date].length === 0) {
+              delete allOrders[date];
+            }
+
+            // 保存回localStorage
+            localStorage.setItem("tradingOrders", JSON.stringify(allOrders));
+            return true;
+          }
+
+          return false;
+        },
+
+        // 删除某一天的所有订单
+        deleteDateOrders: function (date) {
+          const allOrders = this.getAllOrders();
+
+          if (allOrders[date]) {
+            delete allOrders[date];
+            localStorage.setItem("tradingOrders", JSON.stringify(allOrders));
+            return true;
+          }
+
+          return false;
+        },
+
+        // 删除所有订单
+        clearAllOrders: function () {
+          localStorage.removeItem("tradingOrders");
+          return true;
+        },
+      };
+
+      // 侧边栏UI控制
+      const SidebarUI = {
+        init: function () {
+          // 获取DOM元素
+          this.sidebar = document.getElementById("ordersSidebar");
+          this.toggle = document.getElementById("sidebarToggle");
+          this.closeBtn = document.getElementById("sidebarClose");
+          this.content = document.getElementById("sidebarContent");
+          this.clearAllBtn = document.getElementById("clearAllOrders");
+
+          // 订单数量检查和切换按钮状态更新
+          this.updateToggleState();
+
+          // 绑定事件
+          this.bindEvents();
+        },
+
+        bindEvents: function () {
+          // 打开侧边栏
+          this.toggle.addEventListener("click", () => {
+            if (!this.toggle.classList.contains("disabled")) {
+              this.openSidebar();
+            }
+          });
+
+          // 关闭侧边栏
+          this.closeBtn.addEventListener("click", () => {
+            this.closeSidebar();
+          });
+
+          // 清除所有订单
+          this.clearAllBtn.addEventListener("click", () => {
+            if (confirm("确定要清除所有历史订单吗？此操作不可恢复。")) {
+              OrderStorage.clearAllOrders();
+              this.renderOrders();
+              this.updateToggleState();
+
+              // 检查是否还有历史订单，如果没有则自动关闭侧边栏
+              const allOrders = OrderStorage.getAllOrders();
+              if (Object.keys(allOrders).length === 0) {
+                this.closeSidebar();
+              }
+            }
+          });
+
+          // 委托事件监听器用于日期展开/收起
+          this.content.addEventListener("click", e => {
+            // 日期头部点击展开/收起
+            if (e.target.closest(".date-header")) {
+              const dateSection = e.target.closest(".date-section");
+              const orderItems = dateSection.querySelector(".order-items");
+              orderItems.classList.toggle("expanded");
+            }
+
+            // 删除单个订单
+            if (e.target.classList.contains("delete-order")) {
+              const orderId = e.target.dataset.id;
+              const date = e.target.dataset.date;
+
+              if (confirm("确定要删除这个订单吗？")) {
+                OrderStorage.deleteOrder(date, orderId);
+                this.renderOrders();
+                this.updateToggleState();
+
+                // 检查是否还有历史订单，如果没有则自动关闭侧边栏
+                const allOrders = OrderStorage.getAllOrders();
+                if (Object.keys(allOrders).length === 0) {
+                  this.closeSidebar();
+                }
+              }
+            }
+
+            // 删除日期下所有订单
+            if (e.target.classList.contains("delete-date")) {
+              const date = e.target.dataset.date;
+
+              if (confirm(`确定要删除 ${date} 的所有订单吗？`)) {
+                OrderStorage.deleteDateOrders(date);
+                this.renderOrders();
+                this.updateToggleState();
+
+                // 检查是否还有历史订单，如果没有则自动关闭侧边栏
+                const allOrders = OrderStorage.getAllOrders();
+                if (Object.keys(allOrders).length === 0) {
+                  this.closeSidebar();
+                }
+              }
+            }
+          });
+        },
+
+        openSidebar: function () {
+          this.sidebar.classList.add("open");
+          this.toggle.style.display = "none"; // 侧边栏打开时，隐藏侧边栏图标
+          this.renderOrders();
+        },
+
+        closeSidebar: function () {
+          this.sidebar.classList.remove("open");
+          this.toggle.style.display = "flex"; // 侧边栏关闭时，显示侧边栏图标
+        },
+
+        renderOrders: function () {
+          // 获取所有订单
+          const allOrders = OrderStorage.getAllOrders();
+          const dates = Object.keys(allOrders).sort().reverse(); // 最新日期在前
+
+          // 清空内容区域
+          this.content.innerHTML = "";
+
+          if (dates.length === 0) {
+            this.content.innerHTML = '<div class="no-orders-message">暂无历史订单</div>';
+            return;
+          }
+
+          // 为每个日期创建一个部分
+          dates.forEach(date => {
+            const dateOrders = allOrders[date];
+            const dateSection = document.createElement("div");
+            dateSection.className = "date-section";
+
+            // 日期头部
+            const dateHeader = document.createElement("div");
+            dateHeader.className = "date-header";
+            dateHeader.innerHTML = `
+          <div class="date-title">${date} (${dateOrders.length}个订单)</div>
+          <div class="date-actions">
+            <button class="action-button delete delete-date" data-date="${date}">删除</button>
+          </div>
+        `;
+
+            // 创建订单容器
+            const orderItems = document.createElement("div");
+            orderItems.className = "order-items";
+
+            // 为每个订单创建项目
+            dateOrders.forEach(order => {
+              const orderItem = document.createElement("div");
+              orderItem.className = "order-item";
+
+              // 格式化时间
+              const orderTime = new Date(order.timestamp).toLocaleTimeString();
+
+              orderItem.innerHTML = `
+            <div class="order-header">
+              <div class="order-title">${order.assetSymbol} (${order.availableLeverage}x ${order.tradeDirection})</div>
+              <button class="action-button delete delete-order" data-id="${order.id}" data-date="${date}">删除</button>
+            </div>
+            <div class="order-details">
+              <div>入场: ${formatCurrency(order.currentPrice)} | 止盈: ${formatCurrency(
+                order.bufferedTargetPrice
+              )}</div>
+              <div>止损: ${formatCurrency(order.bufferedStopLossPrice)} | 数量: ${order.assetQuantity} ${
+                order.assetSymbol
+              }</div>
+              <div>盈亏比: ${order.riskRewardRatio.toFixed(2)} | 缓冲: ${order.bufferPercent}%</div>
+              <div>时间: ${orderTime}</div>
+            </div>
+          `;
+
+              orderItems.appendChild(orderItem);
+            });
+
+            // 组装日期部分
+            dateSection.appendChild(dateHeader);
+            dateSection.appendChild(orderItems);
+
+            // 添加到内容区域
+            this.content.appendChild(dateSection);
+          });
+        },
+
+        updateToggleState: function () {
+          const allOrders = OrderStorage.getAllOrders();
+          const hasOrders = Object.keys(allOrders).length > 0;
+
+          if (hasOrders) {
+            this.toggle.classList.remove("disabled");
+            this.toggle.querySelector(".sidebar-toggle-tooltip").textContent = "历史订单";
+          } else {
+            this.toggle.classList.add("disabled");
+            this.toggle.querySelector(".sidebar-toggle-tooltip").textContent = "暂无历史订单";
+          }
+        },
+      };
+
+      // 表单提交处理函数
+      document.getElementById("tradingForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        try {
+          const assetSymbol = document.getElementById("assetSymbol").value;
+          const currentPrice = parseFloat(document.getElementById("currentPrice").value);
+          const targetPrice = parseFloat(document.getElementById("targetPrice").value);
+          const stopLossPrice = parseFloat(document.getElementById("stopLossPrice").value);
+          const accountBalance = parseFloat(document.getElementById("accountBalance").value);
+          const maxBalanceRiskPercent = parseFloat(document.getElementById("maxBalanceRiskPercent").value);
+          const availableLeverage = parseFloat(document.getElementById("availableLeverage").value);
+          const minOrderSize = parseFloat(document.getElementById("minOrderSize").value);
+          const pinBarHigh = parseFloat(document.getElementById("pinBarHigh").value);
+          const pinBarLow = parseFloat(document.getElementById("pinBarLow").value);
+          const bufferPercent = parseFloat(document.getElementById("bufferPercent").value); // 新增读取缓冲比例
+
+          const result = calculateFixedRiskTrade(
+            currentPrice,
+            targetPrice,
+            stopLossPrice,
+            accountBalance,
+            maxBalanceRiskPercent,
+            availableLeverage,
+            minOrderSize,
+            pinBarHigh,
+            pinBarLow,
+            bufferPercent // 传递缓冲比例参数
+          );
+
+          // 保存订单到localStorage
+          if (result) {
+            // 创建要保存的订单对象
+            const orderToSave = {
+              assetSymbol,
+              currentPrice,
+              targetPrice,
+              stopLossPrice,
+              bufferedTargetPrice: result.bufferedTargetPrice,
+              bufferedStopLossPrice: result.bufferedStopLossPrice,
+              availableLeverage,
+              tradeDirection: result.tradeDirection,
+              assetQuantity: result.assetQuantity,
+              riskRewardRatio: result.riskRewardRatio,
+              bufferPercent: result.bufferPercent, // 保存缓冲比例到订单中
+            };
+
+            // 保存订单
+            OrderStorage.saveOrder(orderToSave);
+
+            // 更新侧边栏状态
+            SidebarUI.updateToggleState();
+          }
+
+          // 显示结果容器
+          document.getElementById("results").style.display = "block";
+
+          // 填充交易概要
+          document.getElementById("tradeDirection").textContent = result.tradeDirection;
+          document.getElementById("assetQuantity").textContent = `${result.assetQuantity} ${assetSymbol}`;
+          document.getElementById("summaryLeverage").textContent = `${result.availableLeverage}x`;
+          document.getElementById("maxLossInfo").textContent = `账户的 ${result.actualBalanceRiskPercent.toFixed(
+            4
+          )}% (${formatCurrency(result.maxLoss)})`;
+
+          // 填充盈亏比，小于1.5时显示警告，大于1.5时显示绿色
+          renderRiskReward(result.riskRewardRatio, "riskRewardRatio", result.isRecommended);
+
+          // 显示缓冲比例信息
+          document.getElementById("bufferInfo").textContent = `${result.bufferPercent}%`;
+
+          // 填充详细结果
+          document.getElementById("resultAccountBalance").textContent = formatCurrency(accountBalance);
+          document.getElementById(
+            "maxAllowedLoss"
+          ).textContent = `账户总余额的 ${maxBalanceRiskPercent}% (${formatCurrency(result.fixedRiskAmount)})`;
+          document.getElementById(
+            "actualMaxLoss"
+          ).textContent = `账户总余额的 ${result.actualBalanceRiskPercent.toFixed(4)}% (${formatCurrency(
+            result.maxLoss
+          )})`;
+          document.getElementById("resultLeverage").textContent = `${result.availableLeverage}x`;
+
+          document.getElementById("resultCurrentPrice").textContent = formatCurrency(currentPrice);
+          document.getElementById("resultTargetPrice").textContent = `${formatCurrency(result.bufferedTargetPrice)} (${(
+            result.targetProfitPercentage * 100
+          ).toFixed(4)}%)`;
+          document.getElementById("resultStopLossPrice").textContent = `${formatCurrency(
+            result.bufferedStopLossPrice
+          )} (${(result.stopLossPercentage * 100).toFixed(4)}%)`;
+
+          document.getElementById("originalTargetPrice").textContent = formatCurrency(result.originalTargetPrice);
+          document.getElementById("originalStopLossPrice").textContent = formatCurrency(result.originalStopLossPrice);
+
+          document.getElementById("resultTradeDirection").textContent = result.tradeDirection;
+          document.getElementById("resultAssetQuantity").textContent = `${result.assetQuantity} ${assetSymbol}`;
+          document.getElementById("notionalValue").textContent = formatCurrency(result.notionalPositionValue);
+          document.getElementById("marginRequired").textContent = `${formatCurrency(
+            result.marginRequired
+          )} (账户余额的 ${((result.marginRequired / accountBalance) * 100).toFixed(4)}%)`;
+
+          document.getElementById("maxProfit").textContent = formatCurrency(result.maxProfit);
+          document.getElementById("maxLoss").textContent = formatCurrency(result.maxLoss);
+          renderRiskReward(result.riskRewardRatio, "resultRiskRewardRatio", result.isRecommended);
+
+          // 清除之前的回调分析结果
+          const retracementContainer = document.getElementById("retracementContainer");
+          retracementContainer.innerHTML = "";
+
+          // 对回调分析选项按照盈亏比从大到小排序
+          const sortedOptions = [...result.retracementOptions].sort((a, b) => b.riskReward - a.riskReward);
+
+          // 动态添加回调分析结果
+          sortedOptions.forEach(option => {
+            const retracementItem = document.createElement("div");
+            retracementItem.className = "retracement-item";
+            retracementItem.innerHTML = `
+          <div class="retracement-title">${option.title}</div>
+          <div class="result-row">
+            <span class="result-label">${option.entryLabel}</span>
+            <span id="${option.entryId}">${formatCurrency(option.entryPrice)}</span>
+          </div>
+          <div class="price-info">
+            <div class="price-info-row">
+              <span class="price-info-label">止盈价格:</span>
+              <span>${formatCurrency(option.targetPrice)}</span>
+            </div>
+            <div class="price-info-row">
+              <span class="price-info-label">止损价格:</span>
+              <span>${formatCurrency(option.stopLossPrice)}</span>
+            </div>
+          </div>
+          <div class="result-row">
+            <span class="result-label">${option.rrLabel}</span>
+            <span id="${option.rrId}"></span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">${option.qtyLabel}</span>
+            <span id="${option.qtyId}" class="quantity-bold">${option.quantity} ${assetSymbol}</span>
+          </div>
+        `;
+            retracementContainer.appendChild(retracementItem);
+
+            // 设置盈亏比，小于1.5时显示红色警告，大于1.5时显示绿色
+            renderRiskReward(option.riskReward, option.rrId, option.isRecommended);
+          });
+
+          // 显示双挂单建议（如果原始入场盈亏比大于1.5）
+          const dualOrderSuggestion = document.getElementById("dualOrderSuggestion");
+          if (result.showDualOrderSuggestion) {
+            document.getElementById("dualOrder1").textContent = formatCurrency(currentPrice);
+            document.getElementById("dualOrder2").textContent = formatCurrency(result.entry50);
+            document.getElementById("dualOrderTP").textContent = formatCurrency(result.bufferedTargetPrice);
+            document.getElementById("dualOrderSL").textContent = formatCurrency(result.bufferedStopLossPrice);
+            document.getElementById("dualOrderQty").textContent = `${result.assetQuantity} ${assetSymbol}`;
+            dualOrderSuggestion.style.display = "block";
+          } else {
+            dualOrderSuggestion.style.display = "none";
+          }
+
+          // 清除之前的警告信息
+          document.getElementById("warningMessages").innerHTML = "";
+
+          // 添加警告信息（如果有）
+          if (!result.isRecommended) {
+            const warningElement = document.createElement("div");
+            warningElement.className = "warning-message";
+            warningElement.innerHTML = "⛔ 警告: 盈亏比低于1.5，不建议交易!";
+            document.getElementById("warningMessages").appendChild(warningElement);
+          } else {
+            const successElement = document.createElement("div");
+            successElement.className = "success-message";
+            successElement.innerHTML = "✅ 盈亏比大于1.5，交易可考虑";
+            document.getElementById("warningMessages").appendChild(successElement);
+          }
+
+          if (!result.isSufficientBalance) {
+            const warningElement = document.createElement("div");
+            warningElement.className = "warning-message";
+            warningElement.innerHTML = "⛔ 警告: 所需保证金超过账户余额!";
+            document.getElementById("warningMessages").appendChild(warningElement);
+          }
+
+          // 滚动到结果部分
+          document.getElementById("results").scrollIntoView({ behavior: "smooth" });
+        } catch (error) {
+          alert(`计算错误: ${error.message}`);
+        }
+      });
+
+      // 重置参数按钮事件处理
+      document.getElementById("resetParamsBtn").addEventListener("click", function () {
+        // 重置指定字段
+        document.getElementById("assetSymbol").value = "";
+        document.getElementById("currentPrice").value = "";
+        document.getElementById("minOrderSize").value = "0.01";
+        document.getElementById("targetPrice").value = "";
+        document.getElementById("stopLossPrice").value = "";
+        document.getElementById("pinBarHigh").value = "";
+        document.getElementById("pinBarLow").value = "";
+        document.getElementById("bufferPercent").value = "0.1"; // 重置缓冲比例为默认值
 
         // 聚焦到币种符号输入框
         document.getElementById("assetSymbol").focus();
